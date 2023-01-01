@@ -117,7 +117,13 @@ int main(void)
 
   /*##-3- Camera Initialization ############################*/
   /* Initialize the Camera in QVGA mode */
+  //
+#define VGA
+#ifdef VGA
+  BSP_CAMERA_Init(CAMERA_R640x480);
+#else
   BSP_CAMERA_Init(CAMERA_R320x240);
+#endif
 
   /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
   HAL_Delay(1000);
@@ -131,9 +137,19 @@ int main(void)
      Since the DMA associated to DCMI IP is configured in  BSP_CAMERA_MspInit() of stm32l496g_discovery_camera.c file
      with words alignment, the last parameter of HAL_DCMI_Start_DMA is set to:
       (ST7789H2_LCD_PIXEL_WIDTH*ST7789H2_LCD_PIXEL_HEIGHT)/2, that is 240 * 240 / 2
-   */   
+   */
+
+#define SNAP
+#ifdef SNAP
+  hal_status = HAL_DCMI_Start_DMA(&hDcmiHandler, DCMI_MODE_SNAPSHOT,  (uint32_t)pBuffer , (ST7789H2_LCD_PIXEL_WIDTH*ST7789H2_LCD_PIXEL_HEIGHT)/2 );
+  OnError_Handler(hal_status != HAL_OK);
+  HAL_DCMI_Stop(&hDcmiHandler);
+#else
   hal_status = HAL_DCMI_Start_DMA(&hDcmiHandler, DCMI_MODE_CONTINUOUS,  (uint32_t)pBuffer , (ST7789H2_LCD_PIXEL_WIDTH*ST7789H2_LCD_PIXEL_HEIGHT)/2 );
-  OnError_Handler(hal_status != HAL_OK); 
+  OnError_Handler(hal_status != HAL_OK);
+
+#endif
+
 
   /* USER CODE END 2 */
 
@@ -144,6 +160,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+#ifdef SNAP
+	  HAL_Delay(1000);
+	  hal_status = HAL_DCMI_Start_DMA(&hDcmiHandler, DCMI_MODE_SNAPSHOT,  (uint32_t)pBuffer , (ST7789H2_LCD_PIXEL_WIDTH*ST7789H2_LCD_PIXEL_HEIGHT)/2 );
+	  OnError_Handler(hal_status != HAL_OK);
+	  HAL_DCMI_Stop(&hDcmiHandler);
+#endif
   }
   /* USER CODE END 3 */
 }

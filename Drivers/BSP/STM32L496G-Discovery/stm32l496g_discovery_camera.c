@@ -169,10 +169,33 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
 
 
       HAL_DCMI_ConfigCROP(phdcmi,
-                          40,                 /* Crop in the middle of the VGA picture */
+                          40,                /* Crop in the middle of the QVGA picture */
                           0,                 /* Same height (same number of lines: no need to crop vertically) */
                           (240 * 2) - 1,     /* 2 pixels clock needed to capture one pixel */
                           (240 * 1) - 1);    /* All 240 lines are captured */
+      HAL_DCMI_EnableCROP(phdcmi);
+
+
+      /* Set the RGB565 mode */
+      MFX_IO_Write(CameraHwAddress, 0x12 /*OV5640_COM7*/, 0x63);
+      MFX_IO_Write(CameraHwAddress, 0x40 /*OV5640_COM15*/, 0x10);
+      /* Invert the HRef signal */
+      MFX_IO_Write(CameraHwAddress, 0x15 /*OV5640_COM10*/, 0x08);
+      HAL_Delay(500);
+    }
+    else if (Resolution == CAMERA_R640x480) // added by JCT
+    {
+      /* For 240x240 resolution, the OV5640 sensor is set to VGA resolution
+       * as OV5640 doesn't supports 240x240  resolution,
+       * then DCMI is configured to output a 240x240 cropped window */
+      camera_drv->Init(CameraHwAddress, CAMERA_R640x480);
+
+
+      HAL_DCMI_ConfigCROP(phdcmi,
+                          80,                /* Crop in the middle of the VGA picture */
+                          0,                 /* Same height (same number of lines: no need to crop vertically) */
+                          (240 * 2) - 1,     /* 2 pixels clock needed to capture one pixel */
+                          (240 * 2) - 1);    /* 2 pixels clock needed to capture one pixel */
       HAL_DCMI_EnableCROP(phdcmi);
 
 
